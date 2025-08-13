@@ -67,14 +67,14 @@ const messageController = (socket: FakeSOSocket) => {
   };
 
   /**
-   * Fetch all messages in descending order of their date and time.
+   * Fetch all messages in ascending order of their date and time.
    * @param req The request object.
    * @param res The HTTP response object used to send back the messages.
    * @returns A Promise that resolves to void.
    */
   const getMessagesRoute = async (req: Request, res: Response): Promise<void> => {
-    // TODO: Task 2 - Implement the getMessagesRoute function
-    res.status(501).send('Not implemented');
+    const result = await getMessages();
+    res.json(result);
   };
 
   // Add appropriate HTTP verbs and their endpoints to the router
