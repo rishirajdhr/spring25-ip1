@@ -191,6 +191,11 @@ describe('Test userController', () => {
       expect(response.status).toBe(404);
     });
 
-    // TODO: Task 1 - Write additional test cases for deleteUserRoute
+    it('should return 500 for delete error', async () => {
+      deleteUserByUsernameSpy.mockResolvedValueOnce({ error: 'Delete Error' });
+
+      const response = await supertest(app).delete(`/user/deleteUser/${mockUser.username}`);
+      expect(response.status).toBe(500);
+    });
   });
 });
