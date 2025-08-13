@@ -81,9 +81,22 @@ export const loginUser = async (loginCredentials: UserCredentials): Promise<User
  * @param {string} username - The username of the user to delete.
  * @returns {Promise<UserResponse>} - Resolves with the deleted user object (without the password) or an error message.
  */
-export const deleteUserByUsername = async (username: string): Promise<UserResponse> =>
-  // TODO: Task 1 - Implement the deleteUserByUsername function. Refer to other service files for guidance.
-  ({ error: 'Not implemented' });
+export const deleteUserByUsername = async (username: string): Promise<UserResponse> => {
+  try {
+    const result = await UserModel.findOneAndDelete({ username });
+    if (result === null) {
+      return { error: `No user found with username: ${username}` };
+    }
+    const user: SafeUser = {
+      _id: result._id,
+      username: result.username,
+      dateJoined: result.dateJoined,
+    };
+    return user;
+  } catch (error) {
+    return { error: 'Error when deleting user' };
+  }
+};
 
 /**
  * Updates user information in the database.

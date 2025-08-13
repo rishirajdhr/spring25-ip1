@@ -102,8 +102,19 @@ const userController = () => {
    * @returns A promise resolving to void.
    */
   const deleteUser = async (req: UserByUsernameRequest, res: Response): Promise<void> => {
-    // TODO: Task 1 - Implement the deleteUser function
-    res.status(501).send('Not implemented');
+    try {
+      const result = await deleteUserByUsername(req.params.username);
+      if ('error' in result) {
+        throw new Error(result.error);
+      }
+      res.json(result);
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        res.status(500).send(`Error when deleting user: ${err.message}`);
+      } else {
+        res.status(500).send(`Error when deleting user`);
+      }
+    }
   };
 
   /**
@@ -139,6 +150,7 @@ const userController = () => {
   router.get('/getUser/:username', getUser);
   router.post('/login', userLogin);
   router.patch('/resetPassword', resetPassword);
+  router.delete('/deleteUser/:username', deleteUser);
 
   return router;
 };
