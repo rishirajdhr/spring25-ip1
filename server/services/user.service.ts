@@ -92,6 +92,22 @@ export const deleteUserByUsername = async (username: string): Promise<UserRespon
  * @param {Partial<User>} updates - An object containing the fields to update and their new values.
  * @returns {Promise<UserResponse>} - Resolves with the updated user object (without the password) or an error message.
  */
-export const updateUser = async (username: string, updates: Partial<User>): Promise<UserResponse> =>
-  // TODO: Task 1 - Implement the updateUser function. Refer to other service files for guidance.
-  ({ error: 'Not implemented' });
+export const updateUser = async (
+  username: string,
+  updates: Partial<User>,
+): Promise<UserResponse> => {
+  try {
+    const result = await UserModel.findOneAndUpdate({ username }, updates, { new: true });
+    if (result === null) {
+      return { error: `No user found with username: ${username}` };
+    }
+    const user: SafeUser = {
+      _id: result._id,
+      username: result.username,
+      dateJoined: result.dateJoined,
+    };
+    return user;
+  } catch (error) {
+    return { error: 'Error when updating user' };
+  }
+};
