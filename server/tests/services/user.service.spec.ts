@@ -7,7 +7,7 @@ import {
   updateUser,
 } from '../../services/user.service';
 import { SafeUser, User, UserCredentials, UserResponse } from '../../types/user';
-import { user, safeUser } from '../mockData.models';
+import { user } from '../mockData.models';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const mockingoose = require('mockingoose');
@@ -229,11 +229,6 @@ describe('updateUser', () => {
   const updatedUser: User = {
     ...user,
     password: 'newPassword',
-  };
-
-  const safeUpdatedUser: SafeUser = {
-    username: user.username,
-    dateJoined: user.dateJoined,
   };
 
   const updates: Partial<User> = {
