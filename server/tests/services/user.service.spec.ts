@@ -245,7 +245,7 @@ describe('updateUser', () => {
   });
 
   it('should return the updated user when updated succesfully', async () => {
-    mockingoose(UserModel).toReturn(safeUpdatedUser, 'findOneAndUpdate');
+    mockingoose(UserModel).toReturn(updatedUser, 'findOneAndUpdate');
 
     const result = (await updateUser(user.username, updates)) as SafeUser;
 
@@ -255,5 +255,28 @@ describe('updateUser', () => {
     expect(result.dateJoined).toEqual(updatedUser.dateJoined);
   });
 
-  // TODO: Task 1 - Write additional test cases for updateUser
+  it("should not return the updated user's password", async () => {
+    mockingoose(UserModel).toReturn(updatedUser, 'findOneAndUpdate');
+    const result = (await updateUser(user.username, updates)) as SafeUser;
+    expect(result).not.toHaveProperty('password');
+  });
+
+  it('should return an error if the user does not exist', async () => {
+    mockingoose(UserModel).toReturn(null, 'findOneAndUpdate');
+    const response = (await updateUser(user.username, updates)) as Exclude<UserResponse, SafeUser>;
+    expect(response).toHaveProperty('error');
+    expect(typeof response.error).toBe('string');
+  });
+
+  it('should return an error if updating the user fails', async () => {
+    const findOneAndUpdateSpy = jest
+      .spyOn(UserModel, 'findOneAndUpdate')
+      .mockRejectedValue(new Error('Database Error'));
+
+    const response = (await updateUser(user.username, updates)) as Exclude<UserResponse, SafeUser>;
+    expect(response).toHaveProperty('error');
+    expect(typeof response.error).toBe('string');
+
+    findOneAndUpdateSpy.mockRestore();
+  });
 });
