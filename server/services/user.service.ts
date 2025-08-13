@@ -31,9 +31,22 @@ export const saveUser = async (user: User): Promise<UserResponse> => {
  * @param {string} username - The username of the user to find.
  * @returns {Promise<UserResponse>} - Resolves with the found user object (without the password) or an error message.
  */
-export const getUserByUsername = async (username: string): Promise<UserResponse> =>
-  // TODO: Task 1 - Implement the getUserByUsername function. Refer to other service files for guidance.
-  ({ error: 'Not implemented' });
+export const getUserByUsername = async (username: string): Promise<UserResponse> => {
+  try {
+    const result = await UserModel.findOne({ username });
+    if (result === null) {
+      return { error: `No user found with username: ${username}` };
+    }
+    const user: SafeUser = {
+      _id: result._id,
+      username: result.username,
+      dateJoined: result.dateJoined,
+    };
+    return user;
+  } catch (error) {
+    return { error: 'Error when retrieving user' };
+  }
+};
 
 /**
  * Authenticates a user by verifying their username and password.
