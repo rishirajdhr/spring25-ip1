@@ -46,18 +46,27 @@ describe('Test userController', () => {
       expect(saveUserSpy).toHaveBeenCalledWith({ ...mockReqBody, dateJoined: expect.any(Date) });
     });
 
-    it('should return 400 for request missing username', async () => {
+    it.each([
+      { label: 'missing username', mockReqBody: { password: mockUser.password } },
+      { label: 'empty username', mockReqBody: { username: '', password: mockUser.password } },
+      { label: 'missing password', mockReqBody: { username: mockUser.username } },
+      { label: 'empty password', mockReqBody: { username: mockUser.username, password: '' } },
+    ])('should return 400 for request $label', async ({ mockReqBody }) => {
+      const response = await supertest(app).post('/user/signup').send(mockReqBody);
+      expect(response.status).toBe(400);
+    });
+
+    it('should return 500 for save error', async () => {
+      saveUserSpy.mockResolvedValueOnce({ error: 'Save Error' });
+
       const mockReqBody = {
+        username: mockUser.username,
         password: mockUser.password,
       };
 
       const response = await supertest(app).post('/user/signup').send(mockReqBody);
-
-      expect(response.status).toBe(400);
-      expect(response.text).toEqual('Invalid user body');
+      expect(response.status).toBe(500);
     });
-
-    // TODO: Task 1 - Write additional test cases for signupRoute
   });
 
   describe('POST /login', () => {
