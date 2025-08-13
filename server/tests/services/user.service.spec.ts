@@ -6,7 +6,7 @@ import {
   saveUser,
   updateUser,
 } from '../../services/user.service';
-import { SafeUser, User, UserCredentials } from '../../types/user';
+import { SafeUser, User, UserCredentials, UserResponse } from '../../types/user';
 import { user, safeUser } from '../mockData.models';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -30,9 +30,40 @@ describe('User model', () => {
       expect(savedUser._id).toBeDefined();
       expect(savedUser.username).toEqual(user.username);
       expect(savedUser.dateJoined).toEqual(user.dateJoined);
+      expect(savedUser).not.toHaveProperty('password');
     });
 
-    // TODO: Task 1 - Write additional test cases for saveUser
+    it('should return an error for an existing user', async () => {
+      mockingoose(UserModel).toReturn(user, 'findOne');
+
+      const response = (await saveUser(user)) as Exclude<UserResponse, SafeUser>;
+      expect(response).toHaveProperty('error');
+      expect(typeof response.error).toBe('string');
+    });
+
+    it('should return an error if checking existing users fails', async () => {
+      const findOneSpy = jest
+        .spyOn(UserModel, 'findOne')
+        .mockRejectedValue(new Error('Database Error'));
+
+      const response = (await saveUser(user)) as Exclude<UserResponse, SafeUser>;
+      expect(response).toHaveProperty('error');
+      expect(typeof response.error).toBe('string');
+
+      findOneSpy.mockRestore();
+    });
+
+    it('should return an error if creating new user fails', async () => {
+      const createSpy = jest
+        .spyOn(UserModel, 'create')
+        .mockRejectedValue(new Error('Database Error'));
+
+      const response = (await saveUser(user)) as Exclude<UserResponse, SafeUser>;
+      expect(response).toHaveProperty('error');
+      expect(typeof response.error).toBe('string');
+
+      createSpy.mockRestore();
+    });
   });
 });
 
