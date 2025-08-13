@@ -16,18 +16,34 @@ const userController = () => {
    * @param req The incoming request containing user data.
    * @returns `true` if the body contains valid user fields; otherwise, `false`.
    */
-  const isUserBodyValid = (req: UserRequest): boolean => false;
-  // TODO: Task 1 - Implement the isUserBodyValid function
+  const isUserBodyValid = (req: UserRequest): boolean => !!req.body.username && !!req.body.password;
 
   /**
    * Handles the creation of a new user account.
-   * @param req The request containing username, email, and password in the body.
+   * @param req The request containing username and password in the body.
    * @param res The response, either returning the created user or an error.
    * @returns A promise resolving to void.
    */
   const createUser = async (req: UserRequest, res: Response): Promise<void> => {
-    // TODO: Task 1 - Implement the createUser function
-    res.status(501).send('Not implemented');
+    if (!isUserBodyValid(req)) {
+      res.status(400).send('Invalid user body');
+      return;
+    }
+    const userCredentials: UserCredentials = req.body;
+    const newUser: User = { ...userCredentials, dateJoined: new Date() };
+    try {
+      const result = await saveUser(newUser);
+      if ('error' in result) {
+        throw new Error(result.error);
+      }
+      res.json(result);
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        res.status(500).send(`Error when saving user: ${err.message}`);
+      } else {
+        res.status(500).send(`Error when saving user`);
+      }
+    }
   };
 
   /**
@@ -74,8 +90,8 @@ const userController = () => {
     res.status(501).send('Not implemented');
   };
 
-  // Define routes for the user-related operations.
-  // TODO: Task 1 - Add appropriate HTTP verbs and endpoints to the router
+  // Add appropriate HTTP verbs and endpoints to the router
+  router.post('/signup', createUser);
 
   return router;
 };
