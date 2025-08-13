@@ -54,9 +54,26 @@ export const getUserByUsername = async (username: string): Promise<UserResponse>
  * @param {UserCredentials} loginCredentials - An object containing the username and password.
  * @returns {Promise<UserResponse>} - Resolves with the authenticated user object (without the password) or an error message.
  */
-export const loginUser = async (loginCredentials: UserCredentials): Promise<UserResponse> =>
-  // TODO: Task 1 - Implement the loginUser function. Refer to other service files for guidance.
-  ({ error: 'Not implemented' });
+export const loginUser = async (loginCredentials: UserCredentials): Promise<UserResponse> => {
+  const { username, password } = loginCredentials;
+  try {
+    const result = await UserModel.findOne({ username });
+    if (result === null) {
+      return { error: `No user found with username: ${username}` };
+    }
+    if (result.password !== password) {
+      return { error: 'Incorrect password' };
+    }
+    const user: SafeUser = {
+      _id: result._id,
+      username: result.username,
+      dateJoined: result.dateJoined,
+    };
+    return user;
+  } catch (error) {
+    return { error: 'Error when logging in user' };
+  }
+};
 
 /**
  * Deletes a user from the database by their username.

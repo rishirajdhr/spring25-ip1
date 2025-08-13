@@ -53,8 +53,24 @@ const userController = () => {
    * @returns A promise resolving to void.
    */
   const userLogin = async (req: UserRequest, res: Response): Promise<void> => {
-    // TODO: Task 1 - Implement the userLogin function
-    res.status(501).send('Not implemented');
+    if (!isUserBodyValid(req)) {
+      res.status(400).send('Invalid user body');
+      return;
+    }
+    const userCredentials: UserCredentials = req.body;
+    try {
+      const result = await loginUser(userCredentials);
+      if ('error' in result) {
+        throw new Error(result.error);
+      }
+      res.json(result);
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        res.status(500).send(`Error when logging in user: ${err.message}`);
+      } else {
+        res.status(500).send(`Error when logging in user`);
+      }
+    }
   };
 
   /**
@@ -104,6 +120,7 @@ const userController = () => {
   // Add appropriate HTTP verbs and endpoints to the router
   router.post('/signup', createUser);
   router.get('/getUser/:username', getUser);
+  router.post('/login', userLogin);
 
   return router;
 };
