@@ -115,7 +115,7 @@ describe('loginUser', () => {
   });
 
   it('should return the user if authentication succeeds', async () => {
-    mockingoose(UserModel).toReturn(safeUser, 'findOne');
+    mockingoose(UserModel).toReturn(user, 'findOne');
 
     const credentials: UserCredentials = {
       username: user.username,
@@ -128,7 +128,60 @@ describe('loginUser', () => {
     expect(loggedInUser.dateJoined).toEqual(user.dateJoined);
   });
 
-  // TODO: Task 1 - Write additional test cases for loginUser
+  it("should not return the user's password on login", async () => {
+    mockingoose(UserModel).toReturn(user, 'findOne');
+
+    const credentials: UserCredentials = {
+      username: user.username,
+      password: user.password,
+    };
+
+    const loggedInUser = (await loginUser(credentials)) as SafeUser;
+    expect(loggedInUser).not.toHaveProperty('password');
+  });
+
+  it('should return an error if the user does not exist', async () => {
+    mockingoose(UserModel).toReturn(null, 'findOne');
+
+    const credentials: UserCredentials = {
+      username: user.username,
+      password: user.password,
+    };
+
+    const response = (await loginUser(credentials)) as Exclude<UserResponse, SafeUser>;
+    expect(response).toHaveProperty('error');
+    expect(typeof response.error).toBe('string');
+  });
+
+  it('should return an error if the password is incorrect', async () => {
+    mockingoose(UserModel).toReturn(user, 'findOne');
+
+    const credentials: UserCredentials = {
+      username: user.username,
+      password: 'someOtherPassword',
+    };
+
+    const response = (await loginUser(credentials)) as Exclude<UserResponse, SafeUser>;
+    expect(response).toHaveProperty('error');
+    expect(typeof response.error).toBe('string');
+  });
+
+  it('should return an error if retrieving the user fails', async () => {
+    const findOneSpy = jest
+      .spyOn(UserModel, 'findOne')
+      .mockRejectedValue(new Error('Database Error'));
+
+    const credentials: UserCredentials = {
+      username: user.username,
+      password: user.password,
+    };
+
+    const response = (await loginUser(credentials)) as Exclude<UserResponse, SafeUser>;
+    expect(response).toHaveProperty('error');
+    expect(typeof response.error).toBe('string');
+
+    findOneSpy.mockRestore();
+  });
 });
 
 describe('deleteUserByUsername', () => {
