@@ -10,7 +10,11 @@ import { Schema } from 'mongoose';
  * - `dateJoined`: The date the user joined the platform.
  */
 const userSchema: Schema = new Schema(
-  // TODO: Task 1 - Define the schema for a user
+  {
+    username: { type: String, unique: true },
+    password: { type: String },
+    dateJoined: { type: Date },
+  },
   { collection: 'User' },
 );
 
