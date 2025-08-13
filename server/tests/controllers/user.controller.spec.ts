@@ -165,7 +165,12 @@ describe('Test userController', () => {
       expect(response.status).toBe(404);
     });
 
-    // TODO: Task 1 - Write additional test cases for getUserRoute
+    it('should return 500 for retrieval error', async () => {
+      getUserByUsernameSpy.mockResolvedValueOnce({ error: 'Retrieval Error' });
+
+      const response = await supertest(app).get(`/user/getUser/${mockUser.username}`);
+      expect(response.status).toBe(500);
+    });
   });
 
   describe('DELETE /deleteUser', () => {
