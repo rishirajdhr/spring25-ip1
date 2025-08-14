@@ -1,5 +1,8 @@
+import { Query } from 'mongoose';
 import MessageModel from '../../models/messages.model';
+import UserModel from '../../models/users.model';
 import { getMessages, saveMessage } from '../../services/message.service';
+import { Message, MessageResponse } from '../../types/message';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const mockingoose = require('mockingoose');
@@ -33,17 +36,46 @@ describe('Message model', () => {
 
       expect(savedMessage).toMatchObject(message1);
     });
-    // TODO: Task 2 - Write a test case for saveMessage when an error occurs
+
+    it('should return an error if the message user does not exist', async () => {
+      mockingoose(UserModel).toReturn(null, 'findOne');
+
+      const result = (await saveMessage(message1)) as Exclude<MessageResponse, Message>;
+      expect(result).toHaveProperty('error');
+      expect(typeof result.error).toBe('string');
+    });
+
+    it('should return an error if creating the message fails', async () => {
+      const createSpy = jest
+        .spyOn(MessageModel, 'create')
+        .mockRejectedValue(new Error('Create Error'));
+
+      const result = (await saveMessage(message1)) as Exclude<MessageResponse, Message>;
+      expect(result).toHaveProperty('error');
+      expect(typeof result.error).toBe('string');
+
+      createSpy.mockRestore();
+    });
   });
 
   describe('getMessages', () => {
     it('should return all messages, sorted by date', async () => {
-      mockingoose(MessageModel).toReturn([message2, message1], 'find');
+      mockingoose(MessageModel).toReturn([message1, message2], 'find');
 
       const messages = await getMessages();
 
       expect(messages).toMatchObject([message1, message2]);
     });
-    // TODO: Task 2 - Write a test case for getMessages when an error occurs
+
+    it('should return an empty array if retrieval fails', async () => {
+      const sortSpy = jest
+        .spyOn(Query.prototype, 'sort')
+        .mockRejectedValue(new Error('Find Error'));
+
+      const messages = await getMessages();
+      expect(messages).toEqual([]);
+
+      sortSpy.mockRestore();
+    });
   });
 });

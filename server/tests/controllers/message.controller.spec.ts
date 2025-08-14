@@ -38,7 +38,46 @@ describe('POST /addMessage', () => {
     expect(response.text).toBe('Invalid request');
   });
 
-  // TODO: Task 2 - Write additional test cases for addMessageRoute
+  it.each([
+    {
+      label: 'missing message',
+      message: { msgFrom: 'User1', msgDateTime: new Date('2024-06-04') },
+    },
+    {
+      label: 'empty message',
+      message: { msg: '', msgFrom: 'User1', msgDateTime: new Date('2024-06-04') },
+    },
+    { label: 'missing user', message: { msg: 'Hello', msgDateTime: new Date('2024-06-04') } },
+    {
+      label: 'empty user',
+      message: { msg: 'Hello', msgFrom: '', msgDateTime: new Date('2024-06-04') },
+    },
+    { label: 'missing datetime', message: { msg: 'Hello', msgFrom: 'User1' } },
+    { label: 'empty datetime', message: { msg: 'Hello', msgFrom: 'User1', msgDateTime: null } },
+  ])('should return bad request error for $label', async ({ message }) => {
+    const response = await supertest(app)
+      .post('/messaging/addMessage')
+      .send({ messageToAdd: message });
+
+    expect(response.status).toBe(400);
+    expect(response.text).toBe('Invalid message body');
+  });
+
+  it('should return 500 for save error', async () => {
+    saveMessageSpy.mockResolvedValueOnce({ error: 'Save Error' });
+
+    const message = {
+      msg: 'Hello',
+      msgFrom: 'User1',
+      msgDateTime: new Date('2024-06-04'),
+    };
+    const response = await supertest(app)
+      .post('/messaging/addMessage')
+      .send({ messageToAdd: message });
+
+    expect(response.status).toBe(500);
+    expect(response.text).toBe('Error when adding message: Save Error');
+  });
 });
 
 describe('GET /getMessages', () => {

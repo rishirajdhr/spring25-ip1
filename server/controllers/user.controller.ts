@@ -38,11 +38,7 @@ const userController = () => {
       }
       res.json(result);
     } catch (err: unknown) {
-      if (err instanceof Error) {
-        res.status(500).send(`Error when saving user: ${err.message}`);
-      } else {
-        res.status(500).send(`Error when saving user`);
-      }
+      res.status(500).send(`Error when saving user: ${(err as Error).message}`);
     }
   };
 
@@ -65,11 +61,7 @@ const userController = () => {
       }
       res.json(result);
     } catch (err: unknown) {
-      if (err instanceof Error) {
-        res.status(500).send(`Error when logging in user: ${err.message}`);
-      } else {
-        res.status(500).send(`Error when logging in user`);
-      }
+      res.status(500).send(`Error when logging in user: ${(err as Error).message}`);
     }
   };
 
@@ -87,11 +79,7 @@ const userController = () => {
       }
       res.json(result);
     } catch (err: unknown) {
-      if (err instanceof Error) {
-        res.status(500).send(`Error when retrieving user: ${err.message}`);
-      } else {
-        res.status(500).send(`Error when retrieving user`);
-      }
+      res.status(500).send(`Error when retrieving user: ${(err as Error).message}`);
     }
   };
 
@@ -109,11 +97,7 @@ const userController = () => {
       }
       res.json(result);
     } catch (err: unknown) {
-      if (err instanceof Error) {
-        res.status(500).send(`Error when deleting user: ${err.message}`);
-      } else {
-        res.status(500).send(`Error when deleting user`);
-      }
+      res.status(500).send(`Error when deleting user: ${(err as Error).message}`);
     }
   };
 
@@ -137,11 +121,7 @@ const userController = () => {
       }
       res.json(result);
     } catch (err: unknown) {
-      if (err instanceof Error) {
-        res.status(500).send(`Error when resetting password: ${err.message}`);
-      } else {
-        res.status(500).send(`Error when resetting password`);
-      }
+      res.status(500).send(`Error when resetting password: ${(err as Error).message}`);
     }
   };
 
