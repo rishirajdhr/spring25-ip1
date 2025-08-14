@@ -1,3 +1,4 @@
+import { Query } from 'mongoose';
 import MessageModel from '../../models/messages.model';
 import UserModel from '../../models/users.model';
 import { getMessages, saveMessage } from '../../services/message.service';
@@ -59,12 +60,22 @@ describe('Message model', () => {
 
   describe('getMessages', () => {
     it('should return all messages, sorted by date', async () => {
-      mockingoose(MessageModel).toReturn([message2, message1], 'find');
+      mockingoose(MessageModel).toReturn([message1, message2], 'find');
 
       const messages = await getMessages();
 
       expect(messages).toMatchObject([message1, message2]);
     });
-    // TODO: Task 2 - Write a test case for getMessages when an error occurs
+
+    it('should return an empty array if retrieval fails', async () => {
+      const sortSpy = jest
+        .spyOn(Query.prototype, 'sort')
+        .mockRejectedValue(new Error('Find Error'));
+
+      const messages = await getMessages();
+      expect(messages).toEqual([]);
+
+      sortSpy.mockRestore();
+    });
   });
 });
