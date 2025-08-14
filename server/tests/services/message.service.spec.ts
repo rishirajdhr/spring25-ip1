@@ -1,5 +1,7 @@
 import MessageModel from '../../models/messages.model';
+import UserModel from '../../models/users.model';
 import { getMessages, saveMessage } from '../../services/message.service';
+import { Message, MessageResponse } from '../../types/message';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const mockingoose = require('mockingoose');
@@ -33,7 +35,26 @@ describe('Message model', () => {
 
       expect(savedMessage).toMatchObject(message1);
     });
-    // TODO: Task 2 - Write a test case for saveMessage when an error occurs
+
+    it('should return an error if the message user does not exist', async () => {
+      mockingoose(UserModel).toReturn(null, 'findOne');
+
+      const result = (await saveMessage(message1)) as Exclude<MessageResponse, Message>;
+      expect(result).toHaveProperty('error');
+      expect(typeof result.error).toBe('string');
+    });
+
+    it('should return an error if creating the message fails', async () => {
+      const createSpy = jest
+        .spyOn(MessageModel, 'create')
+        .mockRejectedValue(new Error('Create Error'));
+
+      const result = (await saveMessage(message1)) as Exclude<MessageResponse, Message>;
+      expect(result).toHaveProperty('error');
+      expect(typeof result.error).toBe('string');
+
+      createSpy.mockRestore();
+    });
   });
 
   describe('getMessages', () => {
