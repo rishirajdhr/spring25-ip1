@@ -58,11 +58,7 @@ const messageController = (socket: FakeSOSocket) => {
       }
       res.json(result);
     } catch (err: unknown) {
-      if (err instanceof Error) {
-        res.status(500).send(`Error when adding message: ${err.message}`);
-      } else {
-        res.status(500).send(`Error when adding message`);
-      }
+      res.status(500).send(`Error when adding message: ${(err as Error).message}`);
     }
   };
 
