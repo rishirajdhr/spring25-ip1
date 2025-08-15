@@ -46,8 +46,18 @@ describe('Test userController', () => {
       expect(saveUserSpy).toHaveBeenCalledWith({ ...mockReqBody, dateJoined: expect.any(Date) });
     });
 
+    it('should return 400 for request missing username', async () => {
+      const mockReqBody = {
+        password: mockUser.password,
+      };
+
+      const response = await supertest(app).post('/user/signup').send(mockReqBody);
+
+      expect(response.status).toBe(400);
+      expect(response.text).toEqual('Invalid user body');
+    });
+
     it.each([
-      { label: 'missing username', mockReqBody: { password: mockUser.password } },
       { label: 'empty username', mockReqBody: { username: '', password: mockUser.password } },
       { label: 'missing password', mockReqBody: { username: mockUser.username } },
       { label: 'empty password', mockReqBody: { username: mockUser.username, password: '' } },
@@ -85,8 +95,18 @@ describe('Test userController', () => {
       expect(loginUserSpy).toHaveBeenCalledWith(mockReqBody);
     });
 
+    it('should return 400 for request missing username', async () => {
+      const mockReqBody = {
+        password: mockUser.password,
+      };
+
+      const response = await supertest(app).post('/user/login').send(mockReqBody);
+
+      expect(response.status).toBe(400);
+      expect(response.text).toEqual('Invalid user body');
+    });
+
     it.each([
-      { label: 'missing username', mockReqBody: { password: mockUser.password } },
       { label: 'empty username', mockReqBody: { username: '', password: mockUser.password } },
       { label: 'missing password', mockReqBody: { username: mockUser.username } },
       { label: 'empty password', mockReqBody: { username: mockUser.username, password: '' } },
@@ -124,8 +144,18 @@ describe('Test userController', () => {
       expect(updatedUserSpy).toHaveBeenCalledWith(mockUser.username, { password: 'newPassword' });
     });
 
+    it('should return 400 for request missing username', async () => {
+      const mockReqBody = {
+        password: 'newPassword',
+      };
+
+      const response = await supertest(app).patch('/user/resetPassword').send(mockReqBody);
+
+      expect(response.status).toBe(400);
+      expect(response.text).toEqual('Invalid user body');
+    });
+
     it.each([
-      { label: 'missing username', mockReqBody: { password: 'newPassword' } },
       { label: 'empty username', mockReqBody: { username: '', password: 'newPassword' } },
       { label: 'missing password', mockReqBody: { username: mockUser.username } },
       { label: 'empty password', mockReqBody: { username: mockUser.username, password: '' } },

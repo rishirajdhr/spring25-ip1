@@ -7,7 +7,7 @@ import {
   updateUser,
 } from '../../services/user.service';
 import { SafeUser, User, UserCredentials, UserResponse } from '../../types/user';
-import { user } from '../mockData.models';
+import { user, safeUser } from '../mockData.models';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const mockingoose = require('mockingoose');
@@ -30,6 +30,13 @@ describe('User model', () => {
       expect(savedUser._id).toBeDefined();
       expect(savedUser.username).toEqual(user.username);
       expect(savedUser.dateJoined).toEqual(user.dateJoined);
+    });
+
+    it("should not return the user's password", async () => {
+      mockingoose(UserModel).toReturn(user, 'create');
+
+      const savedUser = (await saveUser(user)) as SafeUser;
+
       expect(savedUser).not.toHaveProperty('password');
     });
 
@@ -73,7 +80,7 @@ describe('getUserByUsername', () => {
   });
 
   it('should return the matching user', async () => {
-    mockingoose(UserModel).toReturn(user, 'findOne');
+    mockingoose(UserModel).toReturn(safeUser, 'findOne');
 
     const retrievedUser = (await getUserByUsername(user.username)) as SafeUser;
 
@@ -115,7 +122,7 @@ describe('loginUser', () => {
   });
 
   it('should return the user if authentication succeeds', async () => {
-    mockingoose(UserModel).toReturn(user, 'findOne');
+    mockingoose(UserModel).toReturn(safeUser, 'findOne');
 
     const credentials: UserCredentials = {
       username: user.username,
@@ -154,7 +161,7 @@ describe('loginUser', () => {
   });
 
   it('should return an error if the password is incorrect', async () => {
-    mockingoose(UserModel).toReturn(user, 'findOne');
+    mockingoose(UserModel).toReturn(null, 'findOne');
 
     const credentials: UserCredentials = {
       username: user.username,
@@ -190,7 +197,7 @@ describe('deleteUserByUsername', () => {
   });
 
   it('should return the deleted user when deleted succesfully', async () => {
-    mockingoose(UserModel).toReturn(user, 'findOneAndDelete');
+    mockingoose(UserModel).toReturn(safeUser, 'findOneAndDelete');
 
     const deletedUser = (await deleteUserByUsername(user.username)) as SafeUser;
 
@@ -231,6 +238,11 @@ describe('updateUser', () => {
     password: 'newPassword',
   };
 
+  const safeUpdatedUser: SafeUser = {
+    username: user.username,
+    dateJoined: user.dateJoined,
+  };
+
   const updates: Partial<User> = {
     password: 'newPassword',
   };
@@ -240,7 +252,7 @@ describe('updateUser', () => {
   });
 
   it('should return the updated user when updated succesfully', async () => {
-    mockingoose(UserModel).toReturn(updatedUser, 'findOneAndUpdate');
+    mockingoose(UserModel).toReturn(safeUpdatedUser, 'findOneAndUpdate');
 
     const result = (await updateUser(user.username, updates)) as SafeUser;
 
