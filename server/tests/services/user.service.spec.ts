@@ -161,7 +161,7 @@ describe('loginUser', () => {
   });
 
   it('should return an error if the password is incorrect', async () => {
-    mockingoose(UserModel).toReturn(user, 'findOne');
+    mockingoose(UserModel).toReturn(null, 'findOne');
 
     const credentials: UserCredentials = {
       username: user.username,

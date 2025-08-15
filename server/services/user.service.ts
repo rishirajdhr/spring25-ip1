@@ -57,12 +57,9 @@ export const getUserByUsername = async (username: string): Promise<UserResponse>
 export const loginUser = async (loginCredentials: UserCredentials): Promise<UserResponse> => {
   const { username, password } = loginCredentials;
   try {
-    const result = await UserModel.findOne({ username });
+    const result = await UserModel.findOne({ username, password });
     if (result === null) {
-      return { error: `No user found with username: ${username}` };
-    }
-    if (result.password !== password) {
-      return { error: 'Incorrect password' };
+      return { error: `Could not find a user with received credentials` };
     }
     const user: SafeUser = {
       _id: result._id,

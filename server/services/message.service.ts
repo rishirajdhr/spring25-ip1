@@ -29,7 +29,8 @@ export const saveMessage = async (message: Message): Promise<MessageResponse> =>
  */
 export const getMessages = async (): Promise<Message[]> => {
   try {
-    const result = await MessageModel.find({}).sort({ msgDateTime: 'ascending', _id: 'ascending' });
+    const result = await MessageModel.find({});
+    result.sort((a, b) => a.msgDateTime.getTime() - b.msgDateTime.getTime());
     const messages = result.map(
       (m): Message => ({ _id: m._id, msg: m.msg, msgFrom: m.msgFrom, msgDateTime: m.msgDateTime }),
     );
